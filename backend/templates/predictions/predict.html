@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Prediction{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <a href="{% url 'dashboard' %}" class="text-indigo-600 hover:underline">Back to Dashboard</a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-8 text-white">
+            <h1 class="text-3xl font-bold">AI Prediction Results</h1>
+            <p class="text-lg mt-2">{{ habit.name }}</p>
+        </div>
+        
+        <div class="p-8">
+            <div class="text-center mb-8">
+                {% if prediction.will_complete %}
+                <div class="w-32 h-32 rounded-full bg-green-100 flex items-center justify-center mb-4 mx-auto">
+                    <div class="text-6xl text-green-500">✓</div>
+                </div>
+                <h2 class="text-2xl font-bold text-green-600 mb-2">Likely to Complete</h2>
+                {% else %}
+                <div class="w-32 h-32 rounded-full bg-red-100 flex items-center justify-center mb-4 mx-auto">
+                    <div class="text-6xl text-red-500">!</div>
+                </div>
+                <h2 class="text-2xl font-bold text-red-600 mb-2">At Risk</h2>
+                {% endif %}
+                
+                <div class="bg-gray-100 rounded-lg p-4 inline-block">
+                    <div class="text-4xl font-bold text-gray-800">{{ prediction.probability_percentage }}</div>
+                    <div class="text-sm text-gray-600">Completion Probability</div>
+                </div>
+                
+                <p class="mt-4 text-sm text-gray-600">Confidence: <span class="font-bold">{{ prediction.confidence }}</span></p>
+            </div>
+            
+            <div class="border-t pt-6">
+                <h3 class="text-xl font-bold mb-3">Recommendation</h3>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                    <p class="text-gray-800">{{ recommendation.message }}</p>
+                </div>
+                
+                <h4 class="font-bold mb-2">Tips to improve:</h4>
+                <ul class="space-y-2">
+                    {% for tip in recommendation.tips %}
+                    <li class="flex items-start">
+                        <span class="text-indigo-600 mr-2">•</span>
+                        <span>{{ tip }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="mt-6 p-4 bg-gray-50 rounded">
+                    <div class="text-sm text-gray-600">Risk Level: 
+                        <span class="font-bold {% if recommendation.risk_level == 'Low' %}text-green-600{% elif recommendation.risk_level == 'Medium' %}text-yellow-600{% elif recommendation.risk_level == 'High' %}text-orange-600{% else %}text-red-600{% endif %}">
+                            {{ recommendation.risk_level }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
