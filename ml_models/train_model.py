@@ -123,11 +123,13 @@ class ModelTrainer:
         print("=" * 60)
 
         # Create folder if it doesn't exist
-        os.makedirs('ml_models/trained', exist_ok=True)
-
+        trained_dir = os.path.join(os.path.dirname(__file__), 'trained')
+        os.makedirs(trained_dir, exist_ok=True)
+ 
         # Save the trained model
-        joblib.dump(self.model, 'ml_models/trained/habit_predictor.pkl')
-        print("Model saved to: ml_models/trained/habit_predictor.pkl")
+        model_path = os.path.join(trained_dir, 'habit_predictor.pkl')
+        joblib.dump(self.model, model_path)
+        print(f"Model saved to: {model_path}")
 
     def summary(self, results):
         """Print final summary report"""

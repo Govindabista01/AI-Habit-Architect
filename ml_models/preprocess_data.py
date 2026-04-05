@@ -6,8 +6,9 @@ import joblib
 import os
 
 class DataPreprocessor:
-    def __init__(self, csv_path='ml_models/data/habit_architect_dataset.csv'):
+    def __init__(self, csv_path='ml_models/data/habit_architect_dataset.csv', dataframe=None):
         self.csv_path = csv_path
+        self.dataframe = dataframe
         self.scaler = StandardScaler()
         self.feature_columns = [
             'habit_frequency_per_week',
@@ -17,22 +18,31 @@ class DataPreprocessor:
             'completion_rate_last_30',
             'previous_day_completed',
             'motivation_score',
-            'habit_difficulty'
+            'habit_difficulty',
+            'is_weekend'
         ]
+        self.categorical_columns = ['habit_category', 'day_of_week']
         self.target_column = 'habit_completed_today'
+        self.all_categories = ['health', 'productivity', 'learning', 'mindfulness', 'social', 'finance', 'other']
+        self.all_days = [0, 1, 2, 3, 4, 5, 6]  # Mon-Sun
     
     def load_data(self):
-        """Load CSV dataset"""
+        """Load dataset from DataFrame or CSV"""
         print("=" * 60)
         print("LOADING DATASET")
         print("=" * 60)
         
-        if not os.path.exists(self.csv_path):
-            print(f"ERROR: File not found at {self.csv_path}")
-            return None
-        
-        df = pd.read_csv(self.csv_path)
-        print(f"Dataset loaded: {df.shape[0]} rows × {df.shape[1]} columns")
+        if self.dataframe is not None:
+            df = self.dataframe.copy()
+            print("Dataset loaded from provided DataFrame")
+        else:
+            if not os.path.exists(self.csv_path):
+                print(f"ERROR: File not found at {self.csv_path}")
+                return None
+            df = pd.read_csv(self.csv_path)
+            print("Dataset loaded from CSV")
+            
+        print(f"Dataset Shape: {df.shape[0]} rows × {df.shape[1]} columns")
         return df
     
     def explore_data(self, df):
@@ -83,13 +93,40 @@ class DataPreprocessor:
             return None, None
         
         # Extract features and target
-        X = df[self.feature_columns].copy()
+        X_num = df[self.feature_columns].copy()
+        X_cat = df[self.categorical_columns].copy()
         y = df[self.target_column].copy()
         
-        # Handle missing values
-        X = X.fillna(X.mean())
+        # Handle missing values in numerical features
+        X_num = X_num.fillna(X_num.mean())
         
-        print(f"Features: {X.shape[1]} columns")
+        # One-hot encode categorical features
+        X_cat_encoded = pd.get_dummies(X_cat, columns=self.categorical_columns)
+        
+        # Ensure all expected category columns are present
+        for cat in self.all_categories:
+            col_name = f"habit_category_{cat}"
+            if col_name not in X_cat_encoded.columns:
+                X_cat_encoded[col_name] = 0
+        
+        # Ensure all expected day columns are present
+        for day in self.all_days:
+            col_name = f"day_of_week_{day}"
+            if col_name not in X_cat_encoded.columns:
+                X_cat_encoded[col_name] = 0
+                
+        # Combine numerical and encoded categorical features
+        X = pd.concat([X_num, X_cat_encoded], axis=1)
+        
+        # Ensure consistent column ordering (sorted)
+        X = X.reindex(sorted(X.columns), axis=1)
+        
+        # Save the list of feature names for the predictor
+        trained_dir = os.path.join(os.path.dirname(__file__), 'trained')
+        os.makedirs(trained_dir, exist_ok=True)
+        joblib.dump(list(X.columns), os.path.join(trained_dir, 'feature_names.pkl'))
+        
+        print(f"Features: {X.shape[1]} columns (including one-hot variants)")
         print(f"Samples: {X.shape[0]} rows")
         print(f"Target variable prepared")
         
@@ -124,11 +161,11 @@ class DataPreprocessor:
         X_test_scaled = self.scaler.transform(X_test)
         
         # Save scaler
-        os.makedirs('ml_models/trained', exist_ok=True)
-        joblib.dump(self.scaler, 'ml_models/trained/scaler.pkl')
+        trained_dir = os.path.join(os.path.dirname(__file__), 'trained')
+        os.makedirs(trained_dir, exist_ok=True)
+        joblib.dump(self.scaler, os.path.join(trained_dir, 'scaler.pkl'))
         
-        print("Features scaled using StandardScaler")
-        print("Scaler saved to ml_models/trained/scaler.pkl")
+        print(f"Features scaled and scaler saved to {trained_dir}/scaler.pkl")
         
         return X_train_scaled, X_test_scaled
     
