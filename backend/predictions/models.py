@@ -43,3 +43,18 @@ class Recommendation(models.Model):
     
     def __str__(self):
         return f"Recommendation for {self.prediction.habit.name}"
+
+
+class ModelMetadata(models.Model):
+    """Tracks the history of AI model training"""
+    last_trained_at = models.DateTimeField(auto_now_add=True)
+    record_count_at_training = models.IntegerField()
+    accuracy_achieved = models.FloatField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'model_metadata'
+        get_latest_by = 'last_trained_at'
+        verbose_name_plural = 'Model Metadata'
+    
+    def __str__(self):
+        return f"Model trained on {self.last_trained_at} with {self.record_count_at_training} records"

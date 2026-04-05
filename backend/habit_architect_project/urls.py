@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 
 def home_redirect(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     else:
-        return redirect('login')
+        return render(request, 'home.html')
 
 urlpatterns = [
     # Homepage redirect

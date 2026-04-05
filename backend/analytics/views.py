@@ -95,7 +95,7 @@ def analytics_dashboard(request):
     struggling_habits = []
     for habit in habits:
         rate = habit.get_completion_rate_30_days()
-        if rate < 50:
+        if rate < 0.5:  # Changed from 50 to 0.5 (50%)
             struggling_habits.append({
                 'name': habit.name,
                 'rate': rate,
@@ -116,11 +116,11 @@ def analytics_dashboard(request):
         'longest_streak': longest_streak,
         'completion_rate_30': completion_rate_30,
         
-        # Chart data (convert to JSON for JavaScript)
-        'last_7_days_labels': json.dumps(last_7_days_labels),
-        'last_7_days_data': json.dumps(last_7_days_data),
-        'category_labels': json.dumps(category_labels),
-        'category_values': json.dumps(category_values),
+        # Chart data (let json_script handle serialization)
+        'last_7_days_labels': last_7_days_labels,
+        'last_7_days_data': last_7_days_data,
+        'category_labels': category_labels,
+        'category_values': category_values,
         
         'heatmap_data': heatmap_data,
         'best_habits': best_habits,
@@ -162,8 +162,8 @@ def habit_analytics(request, habit_id):
     
     context = {
         'habit': habit,
-        'dates': json.dumps(dates),
-        'completed_values': json.dumps(completed_values),
+        'dates': dates,
+        'completed_values': completed_values,
         'total_days': total_days,
         'completed_days': completed_days,
         'completion_rate': completion_rate,

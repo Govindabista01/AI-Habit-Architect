@@ -1,225 +1,440 @@
 {% extends 'base.html' %}
+{% load prediction_extras %}
 
-{% block title %}Analytics Dashboard{% endblock %}
+{% block title %}Analytics - IntelliHabit{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
-    <p class="text-gray-600">Track your progress and insights</p>
-</div>
+<div class="max-w-[1250px] mx-auto pt-6 pb-20 px-4 relative z-10">
 
-<!-- Statistics Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-gray-500 text-sm mb-2">Total Habits</div>
-        <div class="text-3xl font-bold text-blue-600">{{ total_habits }}</div>
+    <!-- Header Section -->
+    <div
+        class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center glass-card p-8 rounded-3xl bg-white/40 backdrop-blur-md border border-white shadow-sm">
+        <div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight mb-2">
+                Neural <span class="text-gradient-primary">Analytics</span>
+            </h1>
+            <p class="text-indigo-900/60 font-medium text-lg max-w-xl">
+                Advanced behavioral tracking and progress insights.
+            </p>
+        </div>
+        <div class="mt-6 md:mt-0">
+            <a href="{% url 'dashboard' %}"
+                class="btn-premium px-6 py-3 rounded-xl flex items-center shadow-lg shadow-indigo-500/20 text-sm">
+                <svg class="w-5 h-5 mr-2 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
     </div>
-    
-    <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-gray-500 text-sm mb-2">Total Completions</div>
-        <div class="text-3xl font-bold text-green-600">{{ total_completions }}</div>
-    </div>
-    
-    <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-gray-500 text-sm mb-2">Active Streaks</div>
-        <div class="text-3xl font-bold text-orange-600">{{ active_streaks }}</div>
-    </div>
-    
-    <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-gray-500 text-sm mb-2">30-Day Rate</div>
-        <div class="text-3xl font-bold text-purple-600">{{ completion_rate_30 }}%</div>
-    </div>
-</div>
 
-<!-- Charts Row -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <!-- Last 7 Days Chart -->
-    <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-4">Last 7 Days Activity</h2>
-        <canvas id="last7DaysChart"></canvas>
-    </div>
-    
-    <!-- Category Breakdown -->
-    <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-4">Habits by Category</h2>
-        <canvas id="categoryChart"></canvas>
-    </div>
-</div>
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
 
-<!-- Heatmap -->
-<div class="bg-white p-6 rounded-lg shadow mb-8">
-    <h2 class="text-xl font-bold mb-4">30-Day Activity Heatmap</h2>
-    <div class="grid grid-cols-10 gap-1">
-        {% for day in heatmap_data %}
-        <div class="text-center">
-            <div class="text-xs text-gray-500 mb-1">{{ day.day }}</div>
-            <div class="h-16 rounded cursor-pointer hover:opacity-80 
-                {% if day.percentage >= 80 %}bg-green-500
-                {% elif day.percentage >= 60 %}bg-green-400
-                {% elif day.percentage >= 40 %}bg-yellow-400
-                {% elif day.percentage >= 20 %}bg-orange-400
-                {% elif day.percentage > 0 %}bg-red-400
-                {% else %}bg-gray-200{% endif %}"
-                title="{{ day.date }}: {{ day.completed }}/{{ day.total }} ({{ day.percentage }}%)">
+        <div class="global-glass-card p-6 flex flex-col justify-between">
+            <div
+                class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 mb-4 shadow-sm border border-blue-200/50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+            </div>
+            <div>
+                <div class="text-4xl font-black text-slate-800 tracking-tight">{{ total_habits|default:0 }}</div>
+                <div class="text-xs font-bold text-indigo-900/60 uppercase tracking-widest mt-1">Total Habits</div>
             </div>
         </div>
-        {% endfor %}
-    </div>
-    <div class="mt-4 flex justify-center space-x-4 text-sm">
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-gray-200 rounded mr-2"></div>
-            <span>0%</span>
-        </div>
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-red-400 rounded mr-2"></div>
-            <span>1-39%</span>
-        </div>
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-yellow-400 rounded mr-2"></div>
-            <span>40-59%</span>
-        </div>
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-green-400 rounded mr-2"></div>
-            <span>60-79%</span>
-        </div>
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
-            <span>80-100%</span>
-        </div>
-    </div>
-</div>
 
-<!-- Best and Struggling Habits -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <!-- Best Performing -->
-    <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-4 text-green-600">Top Performing Habits</h2>
-        {% if best_habits %}
-        <div class="space-y-3">
-            {% for habit in best_habits %}
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
-                <div>
-                    <div class="font-bold">{{ habit.name }}</div>
-                    <div class="text-sm text-gray-600">{{ habit.streak }} day streak</div>
-                </div>
-                <div class="text-2xl font-bold text-green-600">{{ habit.rate|floatformat:0 }}%</div>
+        <div class="global-glass-card p-6 flex flex-col justify-between">
+            <div
+                class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 mb-4 shadow-sm border border-green-200/50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p class="text-gray-500">No data yet</p>
-        {% endif %}
-    </div>
-    
-    <!-- Struggling Habits -->
-    <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-4 text-red-600">Needs Attention</h2>
-        {% if struggling_habits %}
-        <div class="space-y-3">
-            {% for habit in struggling_habits %}
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
-                <div>
-                    <div class="font-bold">{{ habit.name }}</div>
-                    <a href="{% url 'predict_habit' habit.id %}" class="text-sm text-indigo-600 hover:underline">Get AI help</a>
-                </div>
-                <div class="text-2xl font-bold text-red-600">{{ habit.rate|floatformat:0 }}%</div>
+            <div>
+                <div class="text-4xl font-black text-slate-800 tracking-tight">{{ total_completions|default:0 }}</div>
+                <div class="text-xs font-bold text-indigo-900/60 uppercase tracking-widest mt-1">Total Completions</div>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-        <p class="text-gray-500">All habits performing well</p>
-        {% endif %}
-    </div>
-</div>
 
-<!-- Recent Predictions -->
-<div class="bg-white p-6 rounded-lg shadow">
-    <h2 class="text-xl font-bold mb-4">Recent AI Predictions</h2>
-    {% if recent_predictions %}
-    <div class="space-y-3">
-        {% for pred in recent_predictions %}
-        <div class="border-l-4 {% if pred.will_complete %}border-green-500{% else %}border-red-500{% endif %} p-3 bg-gray-50">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div class="font-bold">{{ pred.habit.name }}</div>
-                    <div class="text-sm text-gray-600">{{ pred.prediction_date }}</div>
+        <div class="global-glass-card p-6 flex flex-col justify-between">
+            <div
+                class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 mb-4 shadow-sm border border-orange-200/50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <div>
+                <div class="text-4xl font-black text-slate-800 tracking-tight">{{ active_streaks|default:0 }}</div>
+                <div class="text-xs font-bold text-indigo-900/60 uppercase tracking-widest mt-1">Active Streaks</div>
+            </div>
+        </div>
+
+        <div class="global-glass-card p-6 flex flex-col justify-between relative overflow-hidden">
+            <div
+                class="absolute -right-4 -top-4 w-24 h-24 bg-purple-200 rounded-full mix-blend-multiply opacity-50 blur-xl">
+            </div>
+            <div
+                class="relative z-10 w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 mb-4 shadow-sm border border-purple-200/50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+            <div class="relative z-10">
+                <div class="text-4xl font-black text-gradient-primary tracking-tight">{{ completion_rate_30|default:0 }}<span class="text-2xl">%</span></div>
+                <div class="text-xs font-bold text-indigo-900/60 uppercase tracking-widest mt-1">30-Day Rate</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        <!-- Last 7 Days Chart -->
+        <div class="global-glass-card p-8">
+            <h2 class="text-xl font-extrabold tracking-tight text-slate-800 mb-6 flex items-center">
+                <span class="w-2 h-6 bg-indigo-500 rounded-full mr-3 shadow-[0_0_8px_#6366f1]"></span>
+                7-Day Activity Trend
+            </h2>
+            <div class="bg-white/50 rounded-2xl p-4 border border-white shadow-sm">
+                <canvas id="last7DaysChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="global-glass-card p-8">
+            <h2 class="text-xl font-extrabold tracking-tight text-slate-800 mb-6 flex items-center">
+                <span class="w-2 h-6 bg-purple-500 rounded-full mr-3 shadow-[0_0_8px_#a855f7]"></span>
+                Habit Distribution
+            </h2>
+            <div class="bg-white/50 rounded-2xl p-4 border border-white shadow-sm flex items-center justify-center">
+                <div class="w-full max-w-[320px]">
+                    <canvas id="categoryChart"></canvas>
                 </div>
-                <div class="text-right">
-                    <div class="text-xl font-bold {% if pred.will_complete %}text-green-600{% else %}text-red-600{% endif %}">
-                        {{ pred.completion_probability|floatformat:1 }}%
+            </div>
+        </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="global-glass-card p-8 mb-10">
+        <h2 class="text-xl font-extrabold tracking-tight text-slate-800 mb-6 flex items-center">
+            <span class="w-2 h-6 bg-pink-500 rounded-full mr-3 shadow-[0_0_8px_#ec4899]"></span>
+            30-Day Activity Heatmap
+        </h2>
+
+        <div class="bg-white/50 rounded-2xl p-6 border border-white shadow-sm">
+            <div class="grid grid-cols-10 gap-2">
+                {% for day in heatmap_data %}
+                <div class="text-center group relative">
+                    <div class="text-[10px] font-bold text-indigo-900/40 mb-1.5">{{ day.day }}</div>
+                    <div class="h-16 rounded-xl border border-white/50 cursor-pointer transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md
+                        {% if day.percentage >= 80 %}bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-[0_4px_10px_rgba(52,211,153,0.3)]
+                        {% elif day.percentage >= 60 %}bg-gradient-to-br from-green-400 to-green-500 shadow-[0_4px_10px_rgba(74,222,128,0.3)]
+                        {% elif day.percentage >= 40 %}bg-gradient-to-br from-yellow-300 to-yellow-400
+                        {% elif day.percentage >= 20 %}bg-gradient-to-br from-orange-300 to-orange-400
+                        {% elif day.percentage > 0 %}bg-gradient-to-br from-red-300 to-red-400
+                        {% else %}bg-slate-100/80{% endif %}"
+                        title="{{ day.date }}: {{ day.completed }}/{{ day.total }} ({{ day.percentage }}%)">
                     </div>
-                    <div class="text-xs text-gray-500">{{ pred.confidence_level }} confidence</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div
+                class="mt-8 flex flex-wrap justify-center gap-4 text-xs font-bold text-indigo-900/60 uppercase tracking-widest">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-slate-100 border border-white rounded-md mr-2"></div>
+                    <span>0%</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-gradient-to-br from-red-300 to-red-400 rounded-md mr-2"></div>
+                    <span>1-39%</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-md mr-2"></div>
+                    <span>40-59%</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-gradient-to-br from-green-400 to-green-500 rounded-md mr-2"></div>
+                    <span>60-79%</span>
+                </div>
+                <div class="flex items-center">
+                    <div
+                        class="w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-md mr-2 shadow-[0_0_5px_rgba(52,211,153,0.5)]">
+                    </div>
+                    <span>80-100%</span>
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <p class="text-gray-500">No predictions yet</p>
-    {% endif %}
+
+    <!-- Best and Struggling Habits & Predictions -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Best Performing -->
+        <div class="global-glass-card p-8">
+            <h2 class="text-xl font-extrabold tracking-tight text-emerald-600 mb-6 flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Top Performing
+            </h2>
+            {% if best_habits %}
+            <div class="space-y-4">
+                {% for habit in best_habits %}
+                <div
+                    class="flex justify-between items-center p-4 bg-white/60 backdrop-blur-sm border border-white rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div>
+                        <div class="font-bold text-slate-800 text-lg leading-tight">{{ habit.name }}</div>
+                        <div class="text-xs font-bold text-orange-500 uppercase tracking-wider mt-1">{{ habit.streak }}
+                            day streak</div>
+                    </div>
+                    <div class="text-2xl font-black text-emerald-500">{{ habit.rate|format_prob }}%</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-6 bg-white/40 border border-white border-dashed rounded-2xl text-center">
+                <p class="text-indigo-900/50 font-medium font-bold">No data compiled yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Struggling Habits -->
+        <div class="global-glass-card p-8">
+            <h2 class="text-xl font-extrabold tracking-tight text-red-500 mb-6 flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Needs Attention
+            </h2>
+            {% if struggling_habits %}
+            <div class="space-y-4">
+                {% for habit in struggling_habits %}
+                <div
+                    class="flex justify-between items-center p-4 bg-white/60 backdrop-blur-sm border border-red-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div>
+                        <div class="font-bold text-slate-800 text-lg leading-tight">{{ habit.name }}</div>
+                        <a href="{% url 'predict_habit' habit.id %}"
+                            class="inline-flex items-center text-[10px] font-black text-white bg-red-500 hover:bg-red-600 px-2.5 py-1 rounded-md uppercase tracking-wider mt-2 transition-colors">
+                            Ask AI <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="text-2xl font-black text-red-500">{{ habit.rate|format_prob }}%</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-6 bg-white/40 border border-white border-dashed rounded-2xl text-center">
+                <p class="text-indigo-900/50 font-medium font-bold">All protocols nominal.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Predictions -->
+        <div class="global-glass-card p-8">
+            <h2 class="text-xl font-extrabold tracking-tight text-indigo-600 mb-6 flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                AI Log
+            </h2>
+            {% if recent_predictions %}
+            <div class="space-y-4">
+                {% for pred in recent_predictions %}
+                <div
+                    class="group relative overflow-hidden p-5 bg-white/60 backdrop-blur-sm border border-white rounded-3xl shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-500">
+                    <!-- Dynamic indicative side-glow -->
+                    <div
+                        class="absolute left-0 top-0 bottom-0 w-2 {% if pred.will_complete %}bg-emerald-400 shadow-[2px_0_15px_rgba(52,211,153,0.5)]{% else %}bg-orange-400 shadow-[2px_0_15px_rgba(251,146,60,0.5)]{% endif %}">
+                    </div>
+
+                    <div class="flex justify-between items-center pl-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                {% if pred.will_complete %}
+                                <div
+                                    class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                {% else %}
+                                <div
+                                    class="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                {% endif %}
+                                <span class="font-black text-slate-800 text-lg truncate">{{ pred.habit.name }}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[11px] font-bold text-indigo-900/40 uppercase tracking-widest">{{ pred.prediction_date }}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter shadow-sm
+                                    {% if pred.confidence_level == 'High' %}bg-emerald-500 text-white
+                                    {% elif pred.confidence_level == 'Medium' %}bg-amber-400 text-white
+                                    {% else %}bg-slate-300 text-white{% endif %}">
+                                    {{ pred.confidence_level }} Conf.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-right ml-4">
+                            <div class="text-3xl font-black text-gradient-primary leading-none">{{ pred.completion_probability|format_prob }}%</div>
+                            <div
+                                class="mt-2 w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden inline-block border border-white">
+                                <div
+                                    class="h-full rounded-full"
+                                    data-width="{{ pred.completion_probability|format_prob }}"
+                                    data-color="{% if pred.will_complete %}bg-emerald-400{% else %}bg-orange-400{% endif %}"
+                                    style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-6 bg-white/40 border border-white border-dashed rounded-2xl text-center">
+                <p class="text-indigo-900/50 font-medium font-bold">No AI analysis yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
 </div>
+
+<!-- Data injection via json_script to avoid script-block syntax errors -->
+{{ last_7_days_labels|json_script:"last-7-days-labels" }}
+{{ last_7_days_data|json_script:"last-7-days-data" }}
+{{ category_labels|json_script:"category-labels" }}
+{{ category_values|json_script:"category-values" }}
 
 <script>
-// Last 7 Days Line Chart
-const ctx1 = document.getElementById('last7DaysChart').getContext('2d');
-new Chart(ctx1, {
-    type: 'line',
-    data: {
-        labels: {{ last_7_days_labels|safe }},
-        datasets: [{
-            label: 'Completed Habits',
-            data: {{ last_7_days_data|safe }},
-            borderColor: 'rgb(99, 102, 241)',
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-            tension: 0.3,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
-            }
-        }
-    }
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+        Chart.defaults.color = '#64748b';
 
-// Category Pie Chart
-const ctx2 = document.getElementById('categoryChart').getContext('2d');
-new Chart(ctx2, {
-    type: 'doughnut',
-    data: {
-        labels: {{ category_labels|safe }},
-        datasets: [{
-            data: {{ category_values|safe }},
-            backgroundColor: [
-                'rgb(239, 68, 68)',
-                'rgb(59, 130, 246)',
-                'rgb(16, 185, 129)',
-                'rgb(245, 158, 11)',
-                'rgb(139, 92, 246)',
-                'rgb(236, 72, 153)',
-                'rgb(107, 114, 128)'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
+        const labelsLine = JSON.parse(document.getElementById('last-7-days-labels').textContent);
+        const dataLine = JSON.parse(document.getElementById('last-7-days-data').textContent);
+
+        // Last 7 Days Line Chart
+        const ctx1 = document.getElementById('last7DaysChart');
+        if (ctx1) {
+            new Chart(ctx1.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labelsLine,
+                    datasets: [{
+                        label: 'Completed Habits',
+                        data: dataLine,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#6366f1',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 14, weight: 'bold' },
+                            padding: 10,
+                            displayColors: false,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 },
+                            grid: { borderDash: [4, 4], color: 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
         }
-    }
-});
+
+        const labelsPie = JSON.parse(document.getElementById('category-labels').textContent);
+        const dataPie = JSON.parse(document.getElementById('category-values').textContent);
+
+        // Category Pie Chart
+        const ctx2 = document.getElementById('categoryChart');
+        if (ctx2) {
+            new Chart(ctx2.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labelsPie,
+                    datasets: [{
+                        data: dataPie,
+                        backgroundColor: [
+                            '#6366f1', // Indigo
+                            '#a855f7', // Purple
+                            '#ec4899', // Pink
+                            '#f59e0b', // Amber
+                            '#10b981', // Emerald
+                            '#3b82f6', // Blue
+                            '#64748b'  // Slate
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { weight: 'bold', size: 12 },
+                                usePointStyle: true,
+                                boxWidth: 8
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 14, weight: 'bold' },
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize AI Log prediction progress bars
+        document.querySelectorAll('[data-width][data-color]').forEach(function (bar) {
+            bar.style.width = (bar.dataset.width || 0) + '%';
+            bar.classList.add(bar.dataset.color);
+        });
+    });
 </script>
 {% endblock %}

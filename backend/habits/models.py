@@ -70,16 +70,20 @@ class Habit(models.Model):
         return 7 - self.get_completed_last_7_days()
     
     def get_completion_rate_30_days(self):
-        """Calculate completion rate for last 30 days"""
-        thirty_days_ago = timezone.now().date() - timedelta(days=30)
-        total_records = self.records.filter(date__gte=thirty_days_ago).count()
-        if total_records == 0:
-            return 0.0
+        """Calculate success rate based on the current Calendar Month (Fresh Start Logic)"""
+        today = timezone.now().date()
+        start_of_month = today.replace(day=1) # The 1st of this month
+        
+        # Fair denominator: Days passed since the 1st of the month 
+        # (or since creation if created this month)
+        actual_start = max(start_of_month, self.created_at.date())
+        denominator = (today - actual_start).days + 1
+        
         completed_records = self.records.filter(
-            date__gte=thirty_days_ago,
+            date__gte=actual_start,
             completed=True
         ).count()
-        return round(completed_records / total_records, 2)
+        return round(completed_records / denominator, 2)
     
     def was_completed_yesterday(self):
         """Check if habit was completed yesterday"""
