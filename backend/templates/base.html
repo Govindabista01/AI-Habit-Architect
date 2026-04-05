@@ -10,6 +10,11 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         /* Unified Global Premium Theme */
+        html {
+            height: 100%;
+            background: #f8faff;
+        }
+
         body {
             font-family: 'Inter', system-ui, sans-serif;
             background: #f8faff !important;
@@ -17,6 +22,12 @@
             color: #1e1b4b;
             min-height: 100vh;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 1 auto;
         }
 
         /* Neural Mesh Background */
@@ -145,9 +156,21 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Footer links */
+        .footer-link {
+            color: rgba(49, 46, 129, 0.5);
+            font-size: 0.875rem;
+            font-weight: 700;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .footer-link:hover {
+            color: #4338ca;
+            transform: translateX(4px);
+        }
     </style>
 </head>
-<body class="relative overflow-x-hidden">
+<body class="relative" style="display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden;">
     
     <!-- Premium Neural Orbs -->
     <div class="neural-bg"></div>
@@ -210,13 +233,13 @@
     </div>
     {% endif %}
     
-    <main class="animate-fade-in relative z-10 w-full min-h-[70vh]">
+    <main class="animate-fade-in relative z-10 w-full" style="flex:1;">
         {% block content %}
         {% endblock %}
     </main>
     
     <!-- Premium Footer -->
-    <footer class="relative mt-20 isolate">
+    <footer class="relative isolate">
         <!-- SVG Wave Separator -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-[0] translate-y-[-99%] pointer-events-none drop-shadow-[0_-5px_15px_rgba(79,70,229,0.05)]">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-[calc(100%+1.3px)] h-[80px] fill-purple-950/10 backdrop-blur-sm">
@@ -226,7 +249,7 @@
 
         <!-- Main Footer Body -->
         <div class="bg-purple-950/10 backdrop-blur-[45px] border-t border-purple-200 relative z-10 transition-all duration-700">
-            <div class="max-w-7xl mx-auto px-6 lg:px-8 pt-16 pb-12">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 pt-16 pb-8">
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
                     <!-- Brand Column -->
@@ -297,7 +320,7 @@
                 </div>
 
                 <!-- Bottom Copyright Bar -->
-                <div class="mt-20 pt-8 border-t border-indigo-100/50 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="mt-12 pt-8 border-t border-indigo-100/50 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="flex flex-col md:flex-row items-center gap-2 md:gap-6">
                         <p class="text-indigo-900/30 text-[11px] font-black tracking-widest uppercase">
                             © 2026 IntelliHabit. Built with Precision.
@@ -317,11 +340,5 @@
         </div>
     </footer>
 
-    <style type="text/tailwindcss">
-        .footer-link {
-            @apply text-indigo-900/50 hover:text-indigo-700 text-sm font-bold transition-all hover:translate-x-1 inline-block;
-        }
-    </style>
-    
 </body>
 </html>
