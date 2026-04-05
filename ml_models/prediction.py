@@ -7,14 +7,17 @@ class HabitPredictor:
     def __init__(self):
         model_path = os.path.join(os.path.dirname(__file__), 'trained', 'habit_predictor.pkl')
         scaler_path = os.path.join(os.path.dirname(__file__), 'trained', 'scaler.pkl')
+        features_path = os.path.join(os.path.dirname(__file__), 'trained', 'feature_names.pkl')
 
         try:
             self.model = joblib.load(model_path)
             self.scaler = joblib.load(scaler_path)
+            self.feature_names = joblib.load(features_path)
         except FileNotFoundError:
-            print("ERROR: Model files not found. Run train_model.py first.")
+            print("ERROR: Model files not found. Run retrain_ai_model.py or train_model.py first.")
             self.model = None
             self.scaler = None
+            self.feature_names = None
 
     def predict(self, habit_data):
         if self.model is None or self.scaler is None:
@@ -26,18 +29,12 @@ class HabitPredictor:
                 'probability_percentage': '0.0%'
             }
 
-        feature_names = [
-            'habit_frequency_per_week',
-            'streak_length',
-            'completed_days_last_7',
-            'missed_days_last_7',
-            'completion_rate_last_30',
-            'previous_day_completed',
-            'motivation_score',
-            'habit_difficulty'
-        ]
+        import datetime
+        today = datetime.datetime.now()
+        day_of_week = today.weekday()
+        is_weekend = 1 if day_of_week >= 5 else 0
 
-        features = pd.DataFrame([{
+        num_features = {
             'habit_frequency_per_week': habit_data.get('habit_frequency_per_week', 5),
             'streak_length': habit_data.get('streak_length', 0),
             'completed_days_last_7': habit_data.get('completed_days_last_7', 0),
@@ -45,8 +42,33 @@ class HabitPredictor:
             'completion_rate_last_30': habit_data.get('completion_rate_last_30', 0.0),
             'previous_day_completed': habit_data.get('previous_day_completed', 0),
             'motivation_score': habit_data.get('motivation_score', 5),
-            'habit_difficulty': habit_data.get('habit_difficulty', 5)
-        }])[feature_names]
+            'habit_difficulty': habit_data.get('habit_difficulty', 5),
+            'is_weekend': is_weekend
+        }
+
+        # One-hot encode categorical features (Category and Day of Week)
+        category = habit_data.get('habit_category', 'other').lower()
+        all_categories = ['health', 'productivity', 'learning', 'mindfulness', 'social', 'finance', 'other']
+        all_days = [0, 1, 2, 3, 4, 5, 6]
+        
+        # Build the full feature row
+        features_dict = num_features.copy()
+        
+        # Add category columns
+        for cat in all_categories:
+            col_name = f"habit_category_{cat}"
+            features_dict[col_name] = 1 if cat == category else 0
+            
+        # Add day_of_week columns
+        for d in all_days:
+            col_name = f"day_of_week_{d}"
+            features_dict[col_name] = 1 if d == day_of_week else 0
+            
+        # Convert to DataFrame and reorder columns to match training
+        features = pd.DataFrame([features_dict])
+        
+        # Ensure consistent column ordering (sorted) to match training set
+        features = features.reindex(sorted(features.columns), axis=1)
 
         features_scaled = self.scaler.transform(features)
         prediction = self.model.predict(features_scaled)[0]
