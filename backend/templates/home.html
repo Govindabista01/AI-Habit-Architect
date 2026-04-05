@@ -1,101 +1,423 @@
 {% extends 'base.html' %}
 
-{% block title %}IntelliHabit - Build Better Habits{% endblock %}
+{% block title %}IntelliHabit — AI-Powered Habit Intelligence{% endblock %}
 
 {% block content %}
 <style>
-    /* Custom animations for the landing page */
     @keyframes blob {
-        0% { transform: translate(0px, 0px) scale(1); }
-        33% { transform: translate(30px, -50px) scale(1.1); }
-        66% { transform: translate(-20px, 20px) scale(0.9); }
+        0%   { transform: translate(0px, 0px) scale(1); }
+        33%  { transform: translate(30px, -50px) scale(1.1); }
+        66%  { transform: translate(-20px, 20px) scale(0.9); }
         100% { transform: translate(0px, 0px) scale(1); }
     }
-    .animate-blob {
-        animation: blob 7s infinite;
+    .animate-blob { animation: blob 7s infinite; }
+    .delay-2000   { animation-delay: 2s; }
+    .delay-4000   { animation-delay: 4s; }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
-    .animation-delay-2000 {
-        animation-delay: 2s;
+    .fade-up { animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
+    .delay-500 { animation-delay: 0.5s; }
+
+    @keyframes pulse-ring {
+        0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+        70%  { transform: scale(1);    box-shadow: 0 0 0 14px rgba(99,102,241,0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99,102,241,0); }
     }
-    .animation-delay-4000 {
-        animation-delay: 4s;
+    .pulse-ring { animation: pulse-ring 2s infinite; }
+
+    @keyframes float-y {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-12px); }
+    }
+    .float-card { animation: float-y 6s ease-in-out infinite; }
+
+    @keyframes shimmer {
+        0%   { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    .shimmer-text {
+        background: linear-gradient(90deg, #4f46e5 0%, #a855f7 25%, #ec4899 50%, #a855f7 75%, #4f46e5 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: shimmer 4s linear infinite;
+    }
+
+    .step-line::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: calc(100% - 2rem);
+        height: 2px;
+        background: linear-gradient(90deg, #6366f1, #a855f7);
+        opacity: 0.3;
+        transform: translateY(-50%);
+    }
+    @media (max-width: 768px) {
+        .step-line::after { display: none; }
+    }
+
+    .hero-card {
+        background: rgba(255,255,255,0.65);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.9);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px -10px rgba(79,70,229,0.12), 0 1px 2px rgba(0,0,0,0.04);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 30px 70px -10px rgba(79,70,229,0.18), 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .stat-chip {
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.95);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(79,70,229,0.08);
+    }
+
+    .feature-icon-ring {
+        position: relative;
+    }
+    .feature-icon-ring::before {
+        content: '';
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 2px dashed rgba(99,102,241,0.2);
+        animation: spin 12s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .badge-pill {
+        background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1));
+        border: 1px solid rgba(99,102,241,0.2);
+        border-radius: 999px;
+        padding: 6px 16px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4f46e5;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #4f46e5 0%, #7e22ce 50%, #be185d 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
 </style>
 
-<!-- Top Navbar equivalent for unauthenticated standard viewing -->
-<div class="fixed top-0 left-0 w-full p-4 sm:px-8 sm:py-5 flex justify-between items-center z-50 glass-nav">
-    <div class="flex items-center space-x-3 cursor-pointer ml-2 sm:ml-4">
-        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-lg shadow-indigo-500/30 transform hover:scale-105 transition duration-300">
-            IH
+<!-- ─── NAVBAR (unauthenticated) ─────────────────────── -->
+<div class="fixed top-0 left-0 w-full z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex justify-between items-center">
+        <a href="/" class="flex items-center group">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xl mr-3 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform duration-300">
+                IH
+            </div>
+            <span class="text-2xl font-black text-gradient-primary tracking-tight hidden sm:block">IntelliHabit</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'login' %}" class="px-5 py-2.5 rounded-xl font-bold text-indigo-900/70 hover:text-indigo-700 hover:bg-white/60 transition-all border border-transparent hover:border-white text-sm">
+                Log In
+            </a>
+            <a href="{% url 'register' %}" class="px-6 py-2.5 rounded-xl font-bold text-white btn-premium text-sm shadow-lg shadow-indigo-500/20">
+                Get Started Free →
+            </a>
         </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-gradient-primary hidden sm:block">
-            IntelliHabit
-        </h1>
-    </div>
-    <div class="space-x-2 sm:space-x-4 mr-2 sm:mr-4 flex items-center">
-        <a href="{% url 'login' %}" class="px-5 py-2.5 rounded-xl font-bold text-indigo-900/80 hover:text-indigo-700 hover:bg-white/60 transition shadow-sm border border-transparent hover:border-white block">Log In</a>
-        <a href="{% url 'register' %}" class="px-6 py-2.5 rounded-xl font-bold text-white btn-premium">Get Started</a>
     </div>
 </div>
 
-<!-- Hero Section -->
-<div class="min-h-[85vh] flex flex-col items-center justify-center text-center px-4 pt-32 pb-16 relative overflow-hidden mt-6">
-    
-    <!-- Decorative animated background blobs -->
-    <div class="absolute top-20 left-10 w-[30rem] h-[30rem] bg-purple-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob pointer-events-none"></div>
-    <div class="absolute top-40 right-10 w-[30rem] h-[30rem] bg-indigo-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob animation-delay-2000 pointer-events-none"></div>
-    <div class="absolute bottom-10 left-1/3 w-[30rem] h-[30rem] bg-pink-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob animation-delay-4000 pointer-events-none"></div>
+<!-- ─── HERO ─────────────────────────────────────────── -->
+<section class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-28 pb-20 overflow-hidden">
 
-    <div class="relative z-10 max-w-5xl mx-auto py-10">
-        <div class="inline-flex items-center px-5 py-2.5 rounded-full border border-indigo-200/50 bg-white/80 backdrop-blur-md shadow-sm mb-10 text-indigo-700 font-bold text-sm tracking-wide">
-            <span class="flex w-2.5 h-2.5 bg-indigo-500 rounded-full mr-2.5 animate-pulse shadow-[0_0_8px_#6366f1]"></span>
-            Powered by Machine Learning
+    <!-- Animated gradient blobs -->
+    <div class="absolute top-20 left-[-5%] w-[36rem] h-[36rem] bg-purple-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-blob pointer-events-none"></div>
+    <div class="absolute top-32 right-[-5%] w-[36rem] h-[36rem] bg-indigo-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-blob delay-2000 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-1/3 w-[30rem] h-[30rem] bg-pink-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-25 animate-blob delay-4000 pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto">
+
+        <!-- Eyebrow badge -->
+        <div class="fade-up flex justify-center mb-8">
+            <div class="badge-pill">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_#6366f1]"></span>
+                Powered by Machine Learning · Logistic Regression AI
+            </div>
         </div>
-        
-        <h1 class="text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-tight leading-[1.1] mb-8 text-slate-800">
-            Build habits that <br />
-            <span class="text-gradient-primary block mt-2 pb-2">actually stick.</span>
+
+        <!-- Headline -->
+        <h1 class="fade-up delay-100 text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tight leading-[1.05] mb-8 text-slate-800">
+            Build habits that<br>
+            <span class="shimmer-text">actually stick.</span>
         </h1>
-        
-        <p class="text-xl md:text-2xl text-indigo-900/60 mb-14 max-w-3xl mx-auto font-medium leading-relaxed">
-            Stop guessing. Our AI analyzes your behavior and predicts your success, giving you personalized advice exactly when you need it.
+
+        <!-- Sub-headline -->
+        <p class="fade-up delay-200 text-xl md:text-2xl text-indigo-900/55 mb-12 max-w-3xl mx-auto font-medium leading-relaxed">
+            Stop guessing. IntelliHabit analyzes your daily behavior patterns and predicts your success — delivering personalized AI interventions before you break a streak.
         </p>
-        
-        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <a href="{% url 'register' %}" class="w-full sm:w-auto px-10 py-5 btn-premium rounded-2xl font-bold text-xl flex items-center justify-center group shadow-xl shadow-indigo-500/20">
+
+        <!-- CTA buttons -->
+        <div class="fade-up delay-300 flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+            <a href="{% url 'register' %}" id="hero-cta-primary" class="w-full sm:w-auto px-10 py-5 btn-premium rounded-2xl font-bold text-xl flex items-center justify-center group shadow-2xl shadow-indigo-500/25">
                 Start Building Habits
-                <svg class="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                <svg class="ml-2.5 w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </a>
             <a href="{% url 'login' %}" class="w-full sm:w-auto px-10 py-5 bg-white/80 backdrop-blur-md text-slate-700 rounded-2xl font-bold text-xl hover:bg-white hover:text-indigo-700 transition-all border border-indigo-100 shadow-lg flex items-center justify-center">
-                I already have an account
+                I have an account
             </a>
         </div>
-        
-        <div class="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-            <div class="global-glass-card p-10 hover:-translate-y-2 transition-transform duration-300">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 text-indigo-600 shadow-sm border border-indigo-50">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                </div>
-                <h3 class="text-2xl font-bold text-slate-800 mb-3">AI Predictions</h3>
-                <p class="text-indigo-900/60 font-medium text-lg leading-relaxed">Our ML model calculates the precise probability of completing your routines today.</p>
+
+        <!-- Social proof strip -->
+        <div class="fade-up delay-400 flex flex-wrap justify-center gap-4">
+            <div class="stat-chip px-6 py-3 flex items-center gap-2.5">
+                <span class="text-2xl font-black text-indigo-700">93%</span>
+                <span class="text-xs font-bold text-indigo-900/50 uppercase tracking-widest">Prediction<br>Accuracy</span>
             </div>
-            
-            <div class="global-glass-card p-10 transform md:-translate-y-8 hover:-translate-y-10 transition-transform duration-300">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 text-purple-600 shadow-sm border border-purple-50">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                </div>
-                <h3 class="text-2xl font-bold text-slate-800 mb-3">Smart Interventions</h3>
-                <p class="text-indigo-900/60 font-medium text-lg leading-relaxed">Personalized tips sent right to your dashboard exactly when your streaks are at risk.</p>
+            <div class="stat-chip px-6 py-3 flex items-center gap-2.5">
+                <span class="text-2xl font-black text-purple-700">30-Day</span>
+                <span class="text-xs font-bold text-indigo-900/50 uppercase tracking-widest">Streak<br>Heatmap</span>
             </div>
-            
-            <div class="global-glass-card p-10 hover:-translate-y-2 transition-transform duration-300">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 text-pink-500 shadow-sm border border-pink-50">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <h3 class="text-2xl font-bold text-slate-800 mb-3">Beautiful Tracking</h3>
-                <p class="text-indigo-900/60 font-medium text-lg leading-relaxed">Visualize your 30-day timeline, streaks, and success with a premium modern UI.</p>
+            <div class="stat-chip px-6 py-3 flex items-center gap-2.5">
+                <span class="text-2xl font-black text-pink-600">Real-Time</span>
+                <span class="text-xs font-bold text-indigo-900/50 uppercase tracking-widest">AI<br>Interventions</span>
+            </div>
+            <div class="stat-chip px-6 py-3 flex items-center gap-2.5">
+                <span class="text-2xl font-black text-emerald-600">Free</span>
+                <span class="text-xs font-bold text-indigo-900/50 uppercase tracking-widest">To Use<br>Forever</span>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- ─── FEATURES ──────────────────────────────────────── -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 pb-24">
+
+    <div class="text-center mb-16">
+        <div class="badge-pill inline-flex mb-4">Core Capabilities</div>
+        <h2 class="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+            Everything you need to<br><span class="text-gradient-primary">master your discipline</span>
+        </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <!-- Feature 1 -->
+        <div id="feature-ai" class="hero-card p-10 text-left relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+            <div class="relative feature-icon-ring w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center text-indigo-600 mb-7 shadow-sm border border-indigo-100">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-3 tracking-tight">AI Prediction Engine</h3>
+            <p class="text-indigo-900/60 font-medium leading-relaxed mb-6">A custom Logistic Regression model trained on your behavioral history calculates the exact probability you'll complete each habit — updated daily.</p>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <span class="text-xs font-black text-indigo-500 uppercase tracking-widest">Logistic Regression · One-Hot Encoding</span>
+            </div>
+        </div>
+
+        <!-- Feature 2 – elevated middle card -->
+        <div id="feature-streaks" class="hero-card p-10 text-left relative overflow-hidden group md:-translate-y-6 shadow-2xl shadow-indigo-500/10">
+            <div class="absolute -top-6 -right-6 w-28 h-28 bg-purple-400/15 rounded-full blur-2xl group-hover:scale-200 transition-transform duration-700"></div>
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-t-2xl"></div>
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center text-purple-600 mb-7 shadow-sm border border-purple-100">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div class="inline-flex items-center gap-1.5 mb-4 bg-purple-100/70 text-purple-700 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-purple-200/50">
+                ★ Most Impactful
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-3 tracking-tight">Smart Interventions</h3>
+            <p class="text-indigo-900/60 font-medium leading-relaxed mb-6">When AI detects your streak is at risk, it delivers category-specific, actionable tips to your dashboard before you actually fail — not after.</p>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                <span class="text-xs font-black text-purple-500 uppercase tracking-widest">Pre-emptive · Personalized</span>
+            </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div id="feature-analytics" class="hero-card p-10 text-left relative overflow-hidden group">
+            <div class="absolute bottom-0 right-0 w-40 h-40 bg-pink-500/5 rounded-full translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-50 to-rose-100 flex items-center justify-center text-pink-500 mb-7 shadow-sm border border-pink-100">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-3 tracking-tight">Neural Analytics</h3>
+            <p class="text-indigo-900/60 font-medium leading-relaxed mb-6">Visualize your 30-day activity heatmap, completion trends, streak leaderboard, and category breakdown through a stunning analytics dashboard.</p>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+                <span class="text-xs font-black text-pink-500 uppercase tracking-widest">Heatmaps · Charts · Trends</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── HOW IT WORKS ──────────────────────────────────── -->
+<section class="py-24 px-4 sm:px-8 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-50/40 to-transparent pointer-events-none"></div>
+    <div class="max-w-6xl mx-auto relative z-10">
+        <div class="text-center mb-16">
+            <div class="badge-pill inline-flex mb-4">How It Works</div>
+            <h2 class="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+                From signup to<br><span class="text-gradient-primary">AI-powered insights</span>
+            </h2>
+            <p class="text-indigo-900/55 font-medium text-lg mt-4 max-w-2xl mx-auto">Four simple steps stand between you and a complete behavioural intelligence system.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+
+            <!-- Step 1 -->
+            <div class="relative text-center group">
+                <div class="step-line relative inline-block mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-black mx-auto shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">1</div>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 mb-2">Create Account</h3>
+                <p class="text-sm text-indigo-900/55 font-medium leading-relaxed">Sign up free in seconds. No credit card, no friction.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative text-center group">
+                <div class="step-line relative inline-block mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black mx-auto shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform duration-300">2</div>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 mb-2">Add Your Habits</h3>
+                <p class="text-sm text-indigo-900/55 font-medium leading-relaxed">Define habits with frequency, difficulty, and motivation scores.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative text-center group">
+                <div class="step-line relative inline-block mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white text-2xl font-black mx-auto shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform duration-300">3</div>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 mb-2">Track Daily</h3>
+                <p class="text-sm text-indigo-900/55 font-medium leading-relaxed">Check in each day. Your data trains the AI to understand your patterns.</p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="text-center group">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-2xl font-black mx-auto mb-6 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">4</div>
+                <h3 class="text-lg font-black text-slate-800 mb-2">Get AI Insights</h3>
+                <p class="text-sm text-indigo-900/55 font-medium leading-relaxed">Receive probability scores, risk alerts, and personalized tips in real-time.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── STATS SHOWCASE ────────────────────────────────── -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 pb-24">
+    <div class="global-glass-card p-12 md:p-16">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+            <div>
+                <div class="text-5xl font-black text-gradient-primary mb-2">93%</div>
+                <div class="text-xs font-black uppercase tracking-widest text-indigo-900/50">Prediction Accuracy</div>
+            </div>
+            <div>
+                <div class="text-5xl font-black text-gradient-primary mb-2">7+</div>
+                <div class="text-xs font-black uppercase tracking-widest text-indigo-900/50">ML Features Tracked</div>
+            </div>
+            <div>
+                <div class="text-5xl font-black text-gradient-primary mb-2">30D</div>
+                <div class="text-xs font-black uppercase tracking-widest text-indigo-900/50">Activity Heatmaps</div>
+            </div>
+            <div>
+                <div class="text-5xl font-black text-gradient-primary mb-2">∞</div>
+                <div class="text-xs font-black uppercase tracking-widest text-indigo-900/50">Habits You Can Track</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── TESTIMONIALS ──────────────────────────────────── -->
+<section class="max-w-7xl mx-auto px-4 sm:px-8 pb-28">
+    <div class="text-center mb-14">
+        <div class="badge-pill inline-flex mb-4">Real Results</div>
+        <h2 class="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+            What users are <span class="text-gradient-primary">experiencing</span>
+        </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <div class="hero-card p-8">
+            <div class="flex gap-1 mb-5">
+                {% for i in "12345" %}<svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>{% endfor %}
+            </div>
+            <p class="text-slate-700 font-medium leading-relaxed mb-6 text-[15px]">"The AI predicted I would break my gym streak 3 days before I actually did — and sent me tips that kept me going. That's genuinely impressive."</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-black text-sm">A</div>
+                <div>
+                    <div class="font-bold text-slate-800 text-sm">Alex M.</div>
+                    <div class="text-indigo-900/40 text-xs font-bold uppercase tracking-widest">Software Engineer</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-card p-8 md:-translate-y-4 shadow-2xl shadow-indigo-500/10">
+            <div class="flex gap-1 mb-5">
+                {% for i in "12345" %}<svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>{% endfor %}
+            </div>
+            <p class="text-slate-700 font-medium leading-relaxed mb-6 text-[15px]">"I've tried 6 different habit trackers. IntelliHabit is the first one that actually makes me feel like I have a personal coach watching my progress."</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-black text-sm">S</div>
+                <div>
+                    <div class="font-bold text-slate-800 text-sm">Saoirse K.</div>
+                    <div class="text-indigo-900/40 text-xs font-bold uppercase tracking-widest">Product Designer</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-card p-8">
+            <div class="flex gap-1 mb-5">
+                {% for i in "12345" %}<svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1.0 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>{% endfor %}
+            </div>
+            <p class="text-slate-700 font-medium leading-relaxed mb-6 text-[15px]">"The analytics heatmap is incredible. Seeing 30 days of my behavior visualized in one view was the reality check I needed to finally take habits seriously."</p>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white font-black text-sm">R</div>
+                <div>
+                    <div class="font-bold text-slate-800 text-sm">Ravi T.</div>
+                    <div class="text-indigo-900/40 text-xs font-bold uppercase tracking-widest">Entrepreneur</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ─── FINAL CTA ─────────────────────────────────────── -->
+<section class="mx-4 sm:mx-8 mb-16 rounded-3xl cta-section p-16 md:p-24 text-center relative overflow-hidden">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="relative z-10">
+        <h2 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
+            Ready to outsmart<br>your bad habits?
+        </h2>
+        <p class="text-white/70 text-xl font-medium mb-12 max-w-2xl mx-auto leading-relaxed">
+            Join IntelliHabit today and let AI become your personal habit coach. Free, forever.
+        </p>
+        <a href="{% url 'register' %}" id="bottom-cta" class="inline-flex items-center px-12 py-5 bg-white text-indigo-700 font-black text-xl rounded-2xl hover:bg-white/95 transition-all shadow-2xl hover:shadow-white/20 hover:-translate-y-1 group">
+            Start Free Now
+            <svg class="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <p class="text-white/40 text-sm font-bold uppercase tracking-widest mt-6">No credit card · No catch · Just results</p>
+    </div>
+</section>
+
 {% endblock %}
